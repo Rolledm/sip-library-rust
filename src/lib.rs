@@ -133,6 +133,14 @@ impl Message {
         };
         format!("{}{}{}{}{}{}{}{}{}", start_line, self.via, self.to, self.from, self.call_id, self.cseq, self.max_forwards, content_length, self.body)
     }
+
+    pub fn parse(msg: String) -> Message {
+        let msg_split = msg.split("\r\n");
+        println!("{:?}", msg_split);
+
+        //let message = Message::new(mtype: MessageType, domain: String);
+        Message::new(MessageType::Response("200 OK".to_string()), "dom".to_string())
+    }
 }
 
 
