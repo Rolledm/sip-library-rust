@@ -149,7 +149,6 @@ impl Message {
 
     pub fn parse(msg: String) -> Message {
         let msg_split = msg.split("\r\n").collect::<Vec<_>>();
-        println!("{:?}", msg_split);
 
         let msg_head = msg_split[0].split(" ").collect::<Vec<_>>();
 
@@ -158,23 +157,36 @@ impl Message {
             false => MessageType::Request(Message::get_request_method_from_name(msg_head[0]).unwrap())
         };
 
-        //let message = Message::new(mtype: MessageType, domain: String);
-        Message::new(MessageType::Response("200 OK".to_string()), String::new())
+        let mut message = Message::new(message_type, String::new());
+
+        match message.mtype {
+            MessageType::Request(_) => message.request_uri = msg_head[1].chars().skip_while(|c| c != &':').skip(1).take_while(|c| c != &'@').collect(),
+            _ => ()
+        };
+
+        // Need to refactor
+        for i in 1..msg_split.len() {
+            if msg_split[i].starts_with("Via:") {
+                message.via = String::from(msg_split[i]);
+            } else if msg_split[i].starts_with("To:") {
+                message.to = String::from(msg_split[i]);
+            } else if msg_split[i].starts_with("From:") {
+                message.from = String::from(msg_split[i]);
+            } else if msg_split[i].starts_with("Call-ID:") {
+                message.call_id = String::from(msg_split[i]);
+            } else if msg_split[i].starts_with("CSeq:") {
+                message.cseq = String::from(msg_split[i]);
+            } else if msg_split[i].starts_with("Max-Forwards:") {
+                message.max_forwards = String::from(msg_split[i]);
+            } else if msg_split[i].starts_with("Content-Length:") {
+                // do smth
+            } else { // body
+                message.body = String::from(msg_split[i]);
+            }
+        }
+        message
     }
 }
-
-
-/*
-"BYE sip:alice@client.atlanta.example.com SIP/2.0\r
-Via: SIP/2.0/TCP client.chicago.example.com:5060;branch=z9hG4bKfgaw2\r
-Max-Forwards: 70\r
-Route: <sip:ss3.chicago.example.com;lr>\r
-From: Bob <sip:bob@biloxi.example.com>;tag=314159\r
-To: Alice <sip:alice@atlanta.example.com>;tag=9fxced76sl\r
-Call-ID: 2xTb9vxSit55XU7p8@atlanta.example.com\r
-CSeq: 1 BYE\r
-Content-Length: 0\r\n\r\n";
-*/
 
 // TODO TESTS!!!
 #[cfg(test)]
