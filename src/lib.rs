@@ -151,9 +151,12 @@ impl Message {
         let msg_split = msg.split("\r\n").collect::<Vec<_>>();
         println!("{:?}", msg_split);
 
-        let message_type = match msg_split[0].starts_with("SIP") {
-            true => MessageType::Response()
-        }
+        let msg_head = msg_split[0].split(" ").collect::<Vec<_>>();
+
+        let message_type = match msg_head[0].starts_with("SIP") {
+            true => MessageType::Response(format!("{} {}", msg_head[0], msg_head[1])),
+            false => MessageType::Request(Message::get_request_method_from_name(msg_head[0]).unwrap())
+        };
 
         //let message = Message::new(mtype: MessageType, domain: String);
         Message::new(MessageType::Response("200 OK".to_string()), String::new())
