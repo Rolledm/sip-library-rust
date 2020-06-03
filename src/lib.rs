@@ -69,6 +69,19 @@ impl Message {
         }
     }
 
+    fn get_request_method_from_name(name: &str) -> Result<RequestMethod, &'static str> {
+        let method = match name {
+            "ACK" => RequestMethod::ACK,
+            "BYE" => RequestMethod::Bye,
+            "CANCEL" => RequestMethod::Cancel,
+            "INVITE" => RequestMethod::Invite,
+            "OPTIONS" => RequestMethod::Options,
+            "REGISTER" => RequestMethod::Register,
+            _ => return Err("Unknown method name.")
+        };
+        Ok(method)
+    }
+
     // need to change implementation: make struct for each header:
     // for each implement value, build string to avoid this spaghetti
     // also, change branch
@@ -135,11 +148,15 @@ impl Message {
     }
 
     pub fn parse(msg: String) -> Message {
-        let msg_split = msg.split("\r\n");
+        let msg_split = msg.split("\r\n").collect::<Vec<_>>();
         println!("{:?}", msg_split);
 
+        let message_type = match msg_split[0].starts_with("SIP") {
+            true => MessageType::Response()
+        }
+
         //let message = Message::new(mtype: MessageType, domain: String);
-        Message::new(MessageType::Response("200 OK".to_string()), "dom".to_string())
+        Message::new(MessageType::Response("200 OK".to_string()), String::new())
     }
 }
 
