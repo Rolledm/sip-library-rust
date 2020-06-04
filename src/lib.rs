@@ -1,5 +1,7 @@
 // TODO DOCUMENTATION
 
+// TODO divide Message into traits
+
 #[derive(Debug)]
 pub enum MessageType {
     Request(RequestMethod),
@@ -156,7 +158,7 @@ impl Message {
         format!("{}{}{}{}{}{}{}{}{}", start_line, self.via, self.to, self.from, self.call_id, self.cseq, self.max_forwards, content_length, self.body)
     }
 
-    pub fn parse(msg: String) -> Message {
+    pub fn parse(msg: &str) -> Message {
         let msg_split = msg.split("\r\n").collect::<Vec<_>>();
 
         let msg_head = msg_split[0].split(" ").collect::<Vec<_>>();
