@@ -101,6 +101,10 @@ impl Message {
         self
     }
 
+    pub fn get_to(&self) -> String {
+        self.to.chars().skip_while(|c| c != &':').skip(1).skip_while(|c| c != &':').take_while(|c| c != &'@').collect()
+    }
+
     // add tag
     pub fn from(&mut self, display_name: String, ext: String) -> &mut Message {
         if display_name.is_empty() {
@@ -109,6 +113,10 @@ impl Message {
             self.from = format!("From: {} <sip:{}@{}>\r\n", display_name, ext, self.domain);
         }
         self
+    }
+
+    pub fn get_from(&self) -> String {
+        self.from.chars().skip_while(|c| c != &':').skip(1).skip_while(|c| c != &':').take_while(|c| c != &'@').collect()
     }
 
     pub fn call_id(&mut self, call_id: String) -> &mut Message {
