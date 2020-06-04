@@ -16,22 +16,23 @@ pub enum RequestMethod {
     Options,
 }
 
+// Remove pub's, add getters
 #[derive(Debug)]
 pub struct Message {
-    mtype: MessageType, // Request/Response
-    request_uri: String,
+    pub mtype: MessageType, // Request/Response
+    pub request_uri: String,
 
     // Mandatory for request headers:
-    to: String,
-    from: String,
-    cseq: String,
-    call_id: String,
-    max_forwards: String,
-    via: String,
+    pub to: String,
+    pub from: String,
+    pub cseq: String,
+    pub call_id: String,
+    pub max_forwards: String,
+    pub via: String,
 
-    body: String,
+    pub body: String,
 
-    domain: String,
+    pub domain: String,
 }
 
 impl Message {
