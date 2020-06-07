@@ -100,6 +100,7 @@ impl Message {
     }
 
     pub fn to(&mut self, display_name: String, ext: String) -> &mut Message {
+        // TODO change display name from String to Option<String>
         if display_name.is_empty() {
             self.to = format!("To: sip:{}@{}\r\n", ext, self.domain);
         } else {
@@ -113,6 +114,7 @@ impl Message {
     }
 
     pub fn from(&mut self, display_name: String, ext: String) -> &mut Message {
+        // TODO change display name from String to Option<String>
         if display_name.is_empty() {
             self.from = format!("From: sip:{}@{}\r\n", ext, self.domain);
         } else {
@@ -203,11 +205,28 @@ impl Message {
     }
 }
 
-// TODO TESTS!!!
+// TODO more tests
 #[cfg(test)]
 mod tests {
+    use super::*;
+
     #[test]
-    fn it_works() {
-        assert_eq!(2 + 2, 4);
+    fn check_method_name() {
+        let mut message = Message::new(MessageType::Request(RequestMethod::Register), String::from("my.dom.ru"));
+        assert_eq!(message.get_method_name().unwrap(), String::from("REGISTER"));
+    }
+
+    #[test]
+    fn check_to() {
+        let mut message = Message::new(MessageType::Request(RequestMethod::Register), String::from("my.dom.ru"));
+        message.to(String::from("name"), String::from("1175"));
+        assert_ne!(message.get_to(), String::from("1175"));
+    }
+
+    #[test]
+    fn check_from() {
+        let mut message = Message::new(MessageType::Request(RequestMethod::Register), String::from("my.dom.ru"));
+        message.from(String::from("name"), String::from("1176"));
+        assert_ne!(message.get_to(), String::from("1176"));
     }
 }

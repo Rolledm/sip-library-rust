@@ -1,6 +1,6 @@
 [package]
 name = "sip_rld"
-version = "0.2.4"
+version = "0.2.5"
 authors = ["rolledm <rolledm@gmail.com>"]
 edition = "2018"
 description = "Library for work with SIP protocol"
