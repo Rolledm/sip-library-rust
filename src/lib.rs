@@ -99,32 +99,28 @@ impl Message {
         self
     }
 
-    pub fn to(&mut self, display_name: String, ext: String) -> &mut Message {
-        // TODO change display name from String to Option<String>
-        if display_name.is_empty() {
-            self.to = format!("To: sip:{}@{}\r\n", ext, self.domain);
-        } else {
-            self.to = format!("To: {} <sip:{}@{}>\r\n", display_name, ext, self.domain);
-        }
+    pub fn to(&mut self, display_name: Option<String>, ext: String) -> &mut Message {
+        match display_name {
+            None => self.to = format!("To: sip:{}@{}\r\n", ext, self.domain),
+            Some(name) => self.to = format!("To: {} <sip:{}@{}>\r\n", name, ext, self.domain)
+        };
         self
     }
 
     pub fn get_to(&self) -> String {
-        self.to.chars().skip_while(|c| c != &':').skip(1).skip_while(|c| c != &':').take_while(|c| c != &'@').collect()
+        self.to.chars().skip_while(|c| c != &':').skip(1).skip_while(|c| c != &':').skip(1).take_while(|c| c != &'@').collect()
     }
 
-    pub fn from(&mut self, display_name: String, ext: String) -> &mut Message {
-        // TODO change display name from String to Option<String>
-        if display_name.is_empty() {
-            self.from = format!("From: sip:{}@{}\r\n", ext, self.domain);
-        } else {
-            self.from = format!("From: {} <sip:{}@{}>\r\n", display_name, ext, self.domain);
-        }
+    pub fn from(&mut self, display_name: Option<String>, ext: String) -> &mut Message {
+        match display_name {
+            None => self.from = format!("From: sip:{}@{}\r\n", ext, self.domain),
+            Some(name) => self.from = format!("From: {} <sip:{}@{}>\r\n", name, ext, self.domain)
+        };
         self
     }
 
     pub fn get_from(&self) -> String {
-        self.from.chars().skip_while(|c| c != &':').skip(1).skip_while(|c| c != &':').take_while(|c| c != &'@').collect()
+        self.from.chars().skip_while(|c| c != &':').skip(1).skip_while(|c| c != &':').skip(1).take_while(|c| c != &'@').collect()
     }
 
     pub fn call_id(&mut self, call_id: String) -> &mut Message {
@@ -219,14 +215,28 @@ mod tests {
     #[test]
     fn check_to() {
         let mut message = Message::new(MessageType::Request(RequestMethod::Register), String::from("my.dom.ru"));
-        message.to(String::from("name"), String::from("1175"));
-        assert_ne!(message.get_to(), String::from("1175"));
+        message.to(Some(String::from("name")), String::from("1175"));
+        assert_eq!(message.get_to(), String::from("1175"));
     }
 
     #[test]
     fn check_from() {
         let mut message = Message::new(MessageType::Request(RequestMethod::Register), String::from("my.dom.ru"));
-        message.from(String::from("name"), String::from("1176"));
-        assert_ne!(message.get_to(), String::from("1176"));
+        message.from(Some(String::from("name")), String::from("1176"));
+        assert_eq!(message.get_from(), String::from("1176"));
+    }
+
+    #[test]
+    fn check_to_without_dname() {
+        let mut message = Message::new(MessageType::Request(RequestMethod::Register), String::from("my.dom.ru"));
+        message.to(None, String::from("1175"));
+        assert_eq!(message.get_to(), String::from("1175"));
+    }
+
+    #[test]
+    fn check_from_without_dname() {
+        let mut message = Message::new(MessageType::Request(RequestMethod::Register), String::from("my.dom.ru"));
+        message.from(None, String::from("1176"));
+        assert_eq!(message.get_from(), String::from("1176"));
     }
 }
