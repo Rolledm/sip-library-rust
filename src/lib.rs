@@ -16,9 +16,11 @@ pub enum RequestMethod {
     Cancel,
     Bye,
     Options,
+    Subscribe,
+    Notify,
 }
 
-// Remove pub's, add getters
+// TODO Remove pub's, add getters
 #[derive(Debug)]
 pub struct Message {
     pub mtype: MessageType, // Request/Response
@@ -63,6 +65,8 @@ impl Message {
                     RequestMethod::Invite => "INVITE",
                     RequestMethod::Options => "OPTIONS",
                     RequestMethod::Register => "REGISTER",
+                    RequestMethod::Subscribe => "SUBSCRIBE",
+                    RequestMethod::Notify => "NOTIFY",
                 };
                 Ok(method_str.to_string())
             },
@@ -80,12 +84,14 @@ impl Message {
             "INVITE" => RequestMethod::Invite,
             "OPTIONS" => RequestMethod::Options,
             "REGISTER" => RequestMethod::Register,
+            "SUBSCRIBE" => RequestMethod::Subscribe,
+            "NOTIFY" => RequestMethod::Notify,
             _ => return Err("Unknown method name.")
         };
         Ok(method)
     }
 
-    // need to change implementation: make struct for each header:
+    // TODO change implementation: make struct for each header:
     // for each implement value, build string to avoid this spaghetti
     // also, change branch
     pub fn via(&mut self, proto: String, host: String, port: String) -> &mut Message {
@@ -93,7 +99,6 @@ impl Message {
         self
     }
 
-    // add tag
     pub fn to(&mut self, display_name: String, ext: String) -> &mut Message {
         if display_name.is_empty() {
             self.to = format!("To: sip:{}@{}\r\n", ext, self.domain);
@@ -107,7 +112,6 @@ impl Message {
         self.to.chars().skip_while(|c| c != &':').skip(1).skip_while(|c| c != &':').take_while(|c| c != &'@').collect()
     }
 
-    // add tag
     pub fn from(&mut self, display_name: String, ext: String) -> &mut Message {
         if display_name.is_empty() {
             self.from = format!("From: sip:{}@{}\r\n", ext, self.domain);
