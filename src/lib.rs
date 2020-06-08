@@ -150,7 +150,7 @@ impl Message {
                 format!("{} sip:{}@{} SIP/2.0\r\n", method_name, self.request_uri, self.domain)
             },
             MessageType::Response(response) => {
-                format!("SIP/2.0 {}", response)
+                format!("SIP/2.0 {}\r\n", response)
             }
         };
         let content_length = match &self.body.is_empty() {
@@ -166,7 +166,7 @@ impl Message {
         let msg_head = msg_split[0].split(" ").collect::<Vec<_>>();
 
         let message_type = match msg_head[0].starts_with("SIP") {
-            true => MessageType::Response(format!("{} {}", msg_head[0], msg_head[1])),
+            true => MessageType::Response(format!("{} {}", msg_head[1], msg_head[2])),
             false => MessageType::Request(Message::get_request_method_from_name(msg_head[0]).unwrap())
         };
 
@@ -180,21 +180,21 @@ impl Message {
         // Need to refactor
         for i in 1..msg_split.len() {
             if msg_split[i].starts_with("Via:") {
-                message.via = String::from(msg_split[i]);
+                message.via = format!("{}\r\n", msg_split[i]);
             } else if msg_split[i].starts_with("To:") {
-                message.to = String::from(msg_split[i]);
+                message.to = format!("{}\r\n", msg_split[i]);
             } else if msg_split[i].starts_with("From:") {
-                message.from = String::from(msg_split[i]);
+                message.from = format!("{}\r\n", msg_split[i]);
             } else if msg_split[i].starts_with("Call-ID:") {
-                message.call_id = String::from(msg_split[i]);
+                message.call_id = format!("{}\r\n", msg_split[i]);
             } else if msg_split[i].starts_with("CSeq:") {
-                message.cseq = String::from(msg_split[i]);
+                message.cseq = format!("{}\r\n", msg_split[i]);
             } else if msg_split[i].starts_with("Max-Forwards:") {
-                message.max_forwards = String::from(msg_split[i]);
+                message.max_forwards = format!("{}\r\n", msg_split[i]);
             } else if msg_split[i].starts_with("Content-Length:") {
                 // do smth
             } else { // body
-                message.body = String::from(msg_split[i]);
+                message.body = format!("{}\r\n", msg_split[i]);
             }
         }
         message
