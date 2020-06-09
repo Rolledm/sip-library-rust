@@ -18,6 +18,7 @@ pub enum RequestMethod {
     Options,
     Subscribe,
     Notify,
+    Publish,
 }
 
 // TODO Remove pub's, add getters
@@ -25,18 +26,22 @@ pub enum RequestMethod {
 pub struct Message {
     pub mtype: MessageType, // Request/Response
     pub request_uri: String,
+    pub domain: String,
 
     // Mandatory for request headers:
     pub to: String,
     pub from: String,
     pub cseq: String,
     pub call_id: String,
+    pub contact: String,
     pub max_forwards: String,
     pub via: String,
 
-    pub body: String,
+    pub event: String,
+    pub accept: String,
 
-    pub domain: String,
+    pub content_type: String,
+    pub body: String,
 }
 
 impl Message {
@@ -48,9 +53,13 @@ impl Message {
             from: String::new(),
             cseq: String::new(),
             call_id: String::new(),
+            contact: String::new(),
             max_forwards: String::new(),
             via: String::new(),
             body: String::new(),
+            event: String::new(),
+            accept: String::new(),
+            content_type: String::new(),
             domain: domain,
         }
     }
@@ -67,6 +76,7 @@ impl Message {
                     RequestMethod::Register => "REGISTER",
                     RequestMethod::Subscribe => "SUBSCRIBE",
                     RequestMethod::Notify => "NOTIFY",
+                    RequestMethod::Publish => "PUBLISH",
                 };
                 Ok(method_str.to_string())
             },
@@ -86,6 +96,7 @@ impl Message {
             "REGISTER" => RequestMethod::Register,
             "SUBSCRIBE" => RequestMethod::Subscribe,
             "NOTIFY" => RequestMethod::Notify,
+            "PUBLISH" => RequestMethod::Publish,
             _ => return Err("Unknown method name.")
         };
         Ok(method)
@@ -133,6 +144,26 @@ impl Message {
         self
     }
 
+    pub fn event(&mut self, event: String) -> &mut Message {
+        self.event = format!("Event: {}\r\n", event);
+        self
+    }
+
+    pub fn accept(&mut self, accept: String) -> &mut Message {
+        self.cseq = format!("Accept: {}\r\n", accept);
+        self
+    }
+
+    pub fn content_type(&mut self, content_type: String) -> &mut Message {
+        self.content_type = format!("Content-Type: {}\r\n", content_type);
+        self
+    }
+
+    pub fn contact(&mut self, ext: String) -> &mut Message {
+        self.to = format!("Contact: <sip:{}@{}>\r\n", ext, self.domain);
+        self
+    }
+
     pub fn max_forwards(&mut self, number: String) -> &mut Message {
         self.max_forwards = format!("Max-Forwards: {}\r\n", number);
         self
@@ -157,7 +188,19 @@ impl Message {
             true => String::from("Content-Length: 0\r\n\r\n"),
             false => format!("Content-Length: {}\r\n\r\n", &self.body.len()),
         };
-        format!("{}{}{}{}{}{}{}{}{}", start_line, self.via, self.to, self.from, self.call_id, self.cseq, self.max_forwards, content_length, self.body)
+        format!("{}{}{}{}{}{}{}{}{}{}{}{}{}", start_line, 
+                                            self.via, 
+                                            self.to, 
+                                            self.from, 
+                                            self.call_id, 
+                                            self.cseq, 
+                                            self.max_forwards, 
+                                            self.event, 
+                                            self.accept, 
+                                            self.contact,
+                                            self.content_type,
+                                            content_length, 
+                                            self.body)
     }
 
     pub fn parse(msg: &str) -> Message {
